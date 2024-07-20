@@ -153,14 +153,14 @@ void startServer() {
     grpc::ServerBuilder builder;
 
     // register server to address and port
-    builder.AddListeningPort("localhost:80", grpc::InsecureServerCredentials());
+    builder.AddListeningPort("localhost:4000", grpc::InsecureServerCredentials());
     
     // register to service to the server
     builder.RegisterService(&service);
 
     // build and start the server
     std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    std::cout << "Server listening on " << "80" << std::endl;
+    std::cout << "Server listening on " << "4000" << std::endl;
 
     // await for the end of the server
     server->Wait();
