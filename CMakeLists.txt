@@ -27,10 +27,6 @@ add_executable(comm_server src/comm_server.cc)
 target_link_libraries(comm_server protolib)
 target_link_libraries(comm_server gRPC::grpc++_reflection)
 
-
-
-
-
 add_executable(comm_player src/comm_client.cc src/player.c)
 target_link_libraries(comm_player MPI::MPI_CXX)
 target_link_libraries(comm_player protolib)
