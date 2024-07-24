@@ -33,6 +33,8 @@ class CommServiceImpl: public GameComm::Service {
 
         while (stream->Read(&move)) {
 
+            std::cout << "Received message" << std::endl;
+
             switch(move.command()) {
                 // if the Referee recieves a message for player connection request
                 case Command::CONNECT:
@@ -138,7 +140,7 @@ class CommServiceImpl: public GameComm::Service {
         }
 
         // the client's intput stream has come to an end
-        std::cout << "Stream has ended" << std::endl;
+        std::cout << "Game has ended" << std::endl;
 
         // return message to confirm successfuly close of player stream
         return ::grpc::Status::OK;

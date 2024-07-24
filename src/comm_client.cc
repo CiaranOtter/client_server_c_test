@@ -81,13 +81,14 @@ int receive_message(int *move) {
     std::cout << "Running receive message" << std::endl;
 
     ::Move message;
-    // message.set_command(Command::GET_COMMAND);
+    message.set_command(Command::GET_COMMAND);
 
-    // std::cout << "Message has been created" << std::endl;
+    std::cout << "Message has been created" << std::endl;
 
-    // referee->Write(message);
+    referee->Write(message);
 
-    // std::cout << "The message has been written to the referee" << std::endl;
+    std::cout << "The message has been written to the referee" << std::endl;
+    
     referee->Read(&message);
     std::cout << "I have received a message" << std::endl;
 
