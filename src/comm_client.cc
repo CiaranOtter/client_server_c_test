@@ -2,24 +2,24 @@
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
 #include <grpcpp/create_channel.h>
-#include"proto/game_comm.grpc.pb.h"
-#include"proto/game_comm.pb.h"
+#include"tournament_engine_API/game_comm/game_comm.grpc.pb.h"
+#include"tournament_engine_API/game_comm/game_comm.pb.h"
 #include "comm_client.h"
 #include<cstdlib>
 #include<string>
 
 
 
-std::shared_ptr<grpc::ClientReaderWriter<Move, Move>> referee;
+std::shared_ptr<grpc::ClientReaderWriter<game_comm::Move, game_comm::Move>> referee;
 grpc::CompletionQueue *cq;
 std::shared_ptr<grpc::Channel> channel;
-std::unique_ptr<GameComm::Stub> stub;
+std::unique_ptr<game_comm::GameComm::Stub> stub;
 grpc::ClientContext *context;
 
 
 int test() {
-    ::Move connect;
-    connect.set_command(Command::CONNECT);
+    game_comm::Move connect;
+    connect.set_command(game_comm::Command::CONNECT);
     connect.set_player("Ciaran");
     std::cout << "Writing messsage" <<std::endl;
 
@@ -40,7 +40,7 @@ int initialise_comms(char* address, int port) {
     channel = grpc::CreateChannel(full_addr, grpc::InsecureChannelCredentials());
     std::cout << "Channel created" << std::endl;
 
-    stub = GameComm::NewStub(channel);
+    stub = game_comm::GameComm::NewStub(channel);
 
     // test = &(new Stream());
 
@@ -80,8 +80,8 @@ int receive_message(int *move) {
 
     std::cout << "Running receive message" << std::endl;
 
-    ::Move message;
-    message.set_command(Command::GET_COMMAND);
+    game_comm::Move message;
+    message.set_command(game_comm::Command::GET_COMMAND);
 
     std::cout << "Message has been created" << std::endl;
 
@@ -102,8 +102,8 @@ int send_move(char *move) {
 
     std::cout << "The player wants to play " << move << std::endl;
 
-    Move message;
-    message.set_command(Command::PLAY_MOVE);
+    game_comm::Move message;
+    message.set_command(game_comm::Command::PLAY_MOVE);
     message.set_move(*move);
 
     referee->Write(message);
