@@ -2,28 +2,46 @@
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
 #include <grpcpp/create_channel.h>
-#include"tournament_engine_API/game_comm/game_comm.grpc.pb.h"
-#include"tournament_engine_API/game_comm/game_comm.pb.h"
+#include "match_play.grpc.pb.h"
+#include "messages.pb.h"
+#include "match_play.pb.h"
 #include "comm_client.h"
 #include<cstdlib>
 #include<string>
+#include <filesystem>
+// #include <mach-o/dyld.h>
 
-
-
-std::shared_ptr<grpc::ClientReaderWriter<game_comm::Move, game_comm::Move>> referee;
+std::shared_ptr<grpc::ClientReaderWriter<match_play::MatchPlayMessages, match_play::MatchPlayMessages>> referee;
 grpc::CompletionQueue *cq;
 std::shared_ptr<grpc::Channel> channel;
-std::unique_ptr<game_comm::GameComm::Stub> stub;
+std::unique_ptr<match_play::MatchPlayService::Stub> stub;
 grpc::ClientContext *context;
 
+messages::Player player;
 
 int test() {
-    game_comm::Move connect;
-    connect.set_command(game_comm::Command::CONNECT);
-    connect.set_player("Ciaran");
+    char path[PATH_MAX];
+    match_play::MatchPlayMessages connect;
+    connect.set_command(match_play::Command::CONNECT);
+    messages::Player* player = connect.mutable_player();
+
+    char result[PATH_MAX];
+    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+    std::string player_name;
+    if (count != -1) {
+        std::filesystem::path execPath(result, result + count);
+        player_name = execPath.filename().string();
+    } else {
+        player_name = "test";
+    }
+
+    std::cout << "the players naem is: " << player_name << std::endl;
+    player->set_playername(player_name);
+
     std::cout << "Writing messsage" <<std::endl;
 
     referee->Write(connect);
+    // exit(1);
     referee->Read(&connect);
 
     std::cout << "This was a success" << std::endl;
@@ -40,7 +58,7 @@ int initialise_comms(char* address, int port) {
     channel = grpc::CreateChannel(full_addr, grpc::InsecureChannelCredentials());
     std::cout << "Channel created" << std::endl;
 
-    stub = game_comm::GameComm::NewStub(channel);
+    stub = match_play::MatchPlayService::NewStub(channel);
 
     // test = &(new Stream());
 
@@ -48,7 +66,7 @@ int initialise_comms(char* address, int port) {
 
     std::cout << "Stub created" << std::endl;
 
-    referee = stub->GameStream(context);
+    referee = stub->PlayGame(context);
     // referee.reset(temp);
     // referee = s;
 
@@ -58,7 +76,7 @@ int initialise_comms(char* address, int port) {
     // int t = 5;
     // receive_message(&t);
 
-    // ::Move connect;
+    // ::MatchPlayMessages connect;
     // connect.set_command(Command::CONNECT);
 
     // connect.set_player("Ciaran");
@@ -80,8 +98,8 @@ int receive_message(int *move) {
 
     std::cout << "Running receive message" << std::endl;
 
-    game_comm::Move message;
-    message.set_command(game_comm::Command::GET_COMMAND);
+    match_play::MatchPlayMessages message;
+    message.set_command(match_play::Command::GET_COMMAND);
 
     std::cout << "Message has been created" << std::endl;
 
@@ -92,9 +110,10 @@ int receive_message(int *move) {
     referee->Read(&message);
     std::cout << "I have received a message" << std::endl;
 
-    *move = message.move();
+    // if message.command() == stream
+    // *move = message.messag;
 
-    std::cout << "Command value is: " << message.command() << std::endl;
+    // std::cout << "Command value is: " << message.command() << std::endl;
     return message.command();
 }
 
@@ -102,9 +121,13 @@ int send_move(char *move) {
 
     std::cout << "The player wants to play " << move << std::endl;
 
-    game_comm::Move message;
-    message.set_command(game_comm::Command::PLAY_MOVE);
-    message.set_move(*move);
+    match_play::MatchPlayMessages message;
+    message.set_command(match_play::Command::PLAY_MOVE);
+    messages::Player* p = message.mutable_player();
+    p = &player;
+    
+    match_play::Action* action = message.mutable_action();
+    action->set_x(*move);
 
     referee->Write(message);
 

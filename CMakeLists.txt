@@ -12,7 +12,7 @@ find_package(MPI REQUIRED)
 include_directories(tournament_engine_API)
 
 # Get the files from the proto library 
-file(GLOB PROTO_SOURCES "tournament_engine_API/*/*.proto")
+file(GLOB PROTO_SOURCES "proto/*.proto")
 
 # Add the library to the project
 add_library(protolib ${PROTO_SOURCES})
@@ -34,7 +34,7 @@ get_target_property(grpc_cpp_plugin_location gRPC::grpc_cpp_plugin LOCATION)
 protobuf_generate(
     TARGET protolib
     LANGUAGE cpp
-    IMPORT_DIRS ./
+    IMPORT_DIRS ./proto
 )
 # protobuf_generate(TARGET agentprotolib LANGUAGE cpp)
 
@@ -45,6 +45,7 @@ protobuf_generate(
 protobuf_generate(TARGET protolib LANGUAGE grpc
     GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc
     PLUGIN "protoc-gen-grpc=${grpc_cpp_plugin_location}"
+    IMPORT_DIRS ./proto
 )
 # protobuf_generate(TARGET agentprotolib LANGUAGE grpc
 #     GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc
