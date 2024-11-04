@@ -1,0 +1,3 @@
+[submodule "proto"]
+	path = proto
+	url = git@git.cs.sun.ac.za:hostedwebsites/tournament-engine-protobuf-api.git
