@@ -27,7 +27,7 @@ enum MessageType {
 };
 #endif
 
-    EXTERNC const char* playername;
+    // EXTERNC const char* playername;
 
     EXTERNC int initialise_comms(char *address, int port);
     EXTERNC int send_move(char *move);
