@@ -3,11 +3,16 @@
 
 int main(int argc, char** argv) {
     // Create the referee server with game server address
-    RefereeServer referee("localhost:50051");
+    std::cout << "Connecting to streaming server" << std::endl;
+    RefereeServer referee("localhost:5000");
+    std::cout << "Connected to the streaming server" << std::endl;
     
     // Create and register game logic
-    auto game_logic = std::make_unique<TicTacToeLogic>();
+    std::cout << "Loading game logic" << std::endl;
+    auto game_logic = std::make_unique<GoGameLogic>();
+    std::cout << "Game logic created" << std::endl;
     referee.RegisterGameLogic(std::move(game_logic));
+    std::cout << "Game logic loaded" << std::endl;
     
     // Run the server
 

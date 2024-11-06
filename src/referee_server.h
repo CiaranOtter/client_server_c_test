@@ -1,12 +1,12 @@
 // referee_server.h
 #pragma once
-
+#include <memory>
 #include <grpcpp/grpcpp.h>
 #include "match_play.grpc.pb.h"
 #include "messages.pb.h"
 #include "constants.pb.h"
 #include "stream.grpc.pb.h"
-#include <memory>
+
 #include <queue>
 #include <mutex>
 #include <condition_variable>
@@ -51,7 +51,7 @@ private:
     bool SendStreamMessage(const messages::StreamMessages& message);
     
     // Queue management
-    void QueueStreamMessage(messages::StreamMessages&& message);
+    void QueueStreamMessage(messages::MatchPlayMessages&& message);
     messages::StreamMessages WaitForNextMessage();
 
     std::unique_ptr<GameLogicInterface> game_logic_;

@@ -15,7 +15,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "comms.h"
-#include "local_opp.h"
+#include "logic.h"
 
 const int PLAYER_TURN = 1;
 const int OPP_TURN = 2;

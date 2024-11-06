@@ -55,7 +55,7 @@ protobuf_generate(TARGET protolib LANGUAGE grpc
 # add_executable(server src/comm_server.cc)
 # target_link_libraries(server protolib)
 
-add_executable(comm_server src/referee_server.cc src/server.cc src/logic.h src/logic.cc src/referee_server.h)
+add_executable(comm_server src/referee_server.cc src/server.cc src/logic.h src/logic.cc src/referee_server.h src/local_opp.c)
 # target_link_libraries(comm_server utilprotolib)
 target_link_libraries(comm_server protolib)
 # target_link_libraries(comm_server agentprotolib)

@@ -21,10 +21,18 @@ void RefereeServer::ConnectToStreamService() {
     stream_writer_ = stream_service_stub_->SendStream(stream_context_.get(), &response);
 }
 
-void RefereeServer::QueueStreamMessage(messages::StreamMessages&& message) {
+void RefereeServer::QueueStreamMessage(messages::MatchPlayMessages&& message) {
+
+    messages::MatchPlayMessages match_message;
+    match_message.CopyFrom(message); // Copy `message` correctly
+
+    messages::StreamMessages stream_message;
+    stream_message.set_allocated_streammessages(new messages::MatchPlayMessages(std::move(match_message)));
+    
+
     {
         std::lock_guard<std::mutex> lock(queue_mutex_);
-        message_queue_.push(std::move(message));
+        message_queue_.push(std::move(stream_message));
     }
     queue_cv_.notify_one();
 }
@@ -109,6 +117,8 @@ grpc::Status RefereeServer::GameServiceImpl::PlayGame(
 
         std::cout << "Received a message from a client" << std::endl;
         messages::MatchPlayMessages response;
+
+        referee_server_->QueueStreamMessage(std::move(request));
 
         switch (request.command()) {
             case constants::Command::CONNECT: {
