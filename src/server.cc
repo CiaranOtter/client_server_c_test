@@ -1,3 +1,4 @@
+// #pragma once
 #include "referee_server.h"
 #include "logic.h"
 

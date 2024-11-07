@@ -50,6 +50,11 @@ const int DRAW_RESULT = -1;
 const int NON_TERMINAL_RESULT = -2;
 const char *OPP_NAME_LOG = "opponent.log";
 
+int BSIZE;
+int *opp_board;
+int opp_colour;
+FILE *opp_fp;
+
 // void opp_run_master(int);
 
 // void opp_initialise_board(void);

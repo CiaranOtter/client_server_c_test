@@ -1,6 +1,6 @@
-#pragma once
 
-#if defined(__cplusplus)
+#ifdef __cplusplus
+
 #include "referee_server.h"
 #include <memory>
   // Only include this when compiling as C++
@@ -9,6 +9,7 @@
 extern "C" {
 #endif
 
+#ifndef LOCAL_H
 #define LOCAL_H
 
 #define EMPTY -1
@@ -31,15 +32,15 @@ bool full(void);
 double* get_score(void);
 bool game_over(void);
 
-int BSIZE;
-int *opp_board;
-int opp_colour;
-FILE *opp_fp;
+extern int BSIZE;
+extern int *opp_board;
+extern int opp_colour;
+extern FILE *opp_fp;
+
+#endif // LOCAL_H
 
 
-
-
-#if defined(__cplusplus)
+#ifdef __cplusplus
 }
 
 class GoGameLogic : public GameLogicInterface {
