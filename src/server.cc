@@ -3,9 +3,23 @@
 #include "logic.h"
 
 int main(int argc, char** argv) {
+
+    if (argc != 3) {
+        printf("Usage: %s <inetaddress> <port>\n", argv[0]);
+        return 1;
+    }
+    
+
+    char* inet = argv[1];
+    int port = atoi(argv[2]);
+
+    char address[100];
+
+    sprintf(address, "%s:%d", inet, port);
+
     // Create the referee server with game server address
     std::cout << "Connecting to streaming server" << std::endl;
-    RefereeServer referee("localhost:5000");
+    RefereeServer referee(address);
     std::cout << "Connected to the streaming server" << std::endl;
     
     // Create and register game logic

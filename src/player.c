@@ -74,6 +74,7 @@ int main(int argc, char *argv[]) {
         printf("Usage: %s <inetaddress> <port> <time_limit> <player_colour> <board_size>\n", argv[0]);
         return 1;
     }
+    
     PLAYER_NAME_LOG = (char*) malloc(50*sizeof(char));
     sprintf(PLAYER_NAME_LOG, "player_%s.log", argv[4]);
 

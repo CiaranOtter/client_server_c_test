@@ -3,3 +3,6 @@ all:
 
 compile:
 	javac 
+
+build-docker:
+	docker build -t test-ref-c -f dep_docker/Dockerfile .
