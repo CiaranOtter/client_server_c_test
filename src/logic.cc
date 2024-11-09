@@ -7,8 +7,7 @@
 GoGameLogic::GoGameLogic() {
     // Initialize the game board
 
-    BSIZE = 15;
-    opp_initialise_board();
+    opp_init(15);
 }
 
 GoGameLogic::~GoGameLogic() {
@@ -17,15 +16,26 @@ GoGameLogic::~GoGameLogic() {
 }
 
 bool GoGameLogic::isMoveLegal(int position) {
+
+    if (full()) {
+        std::cout << "The board is full" << std::endl;
+        return false;
+    }
+    num_legal_moves_ = 0;
     // Get current legal moves
     opp_legal_moves(legal_moves_, &num_legal_moves_);
+
+    std::cout << "There are still " << num_legal_moves_ << " legal moves in the match" << std::endl;
     
     // Check if the position is in the legal moves array
     for (int i = 0; i < num_legal_moves_; i++) {
+        std::cout << legal_moves_[i] << std::endl;
         if (legal_moves_[i] == position) {
             return true;
         }
     }
+
+    std::cout << "failed to find the move in the list of legal moves" << std::endl;
     return false;
 }
 
@@ -39,6 +49,7 @@ bool GoGameLogic::validateAction(const messages::Action& action) {
 }
 
 bool GoGameLogic::processAction(const messages::Action& action) {
+    std::cout << "Processing the action" << std::endl;
     try {
         int position = action.x();
         if (!isMoveLegal(position)) {
@@ -49,8 +60,9 @@ bool GoGameLogic::processAction(const messages::Action& action) {
         opp_make_move(position, 1);
         
         // Update match state
-        updateMatchState();
+        // updateMatchState();
         
+        std::cout << "The action has been processed" << std::endl;
         return true;
     } catch (const std::exception&) {
         return false;

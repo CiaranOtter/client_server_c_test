@@ -72,31 +72,31 @@ FILE *opp_fp;
 // bool game_over(void);
 
 
-int opp_init(int colour, int boardsize) {
+int opp_init(int boardsize) {
 
     /* Initialise board */
     BSIZE = boardsize;
     opp_initialise_board();
     /* Initialise colour */
-    opp_colour = colour; 
-    printf("Opponent colour: %d, %s \n", opp_colour, (opp_colour == BLACK)?"black":"white");
+    // opp_colour = colour; 
+    // printf("Opponent colour: %d, %s \n", opp_colour, (opp_colour == BLACK)?"black":"white");
 
     /* Open file for logging */
-    opp_fp = fopen(OPP_NAME_LOG, "w");
-    if (opp_fp == NULL) {
-        printf("Could not open log file\n");
-        return 0;
-    }
+    // opp_fp = fopen(OPP_NAME_LOG, "w");
+    // if (opp_fp == NULL) {
+    //     printf("Could not open log file\n");
+    //     return 0;
+    // }
 
-    fprintf(opp_fp, "Communication initialised \n");
-    fprintf(opp_fp, "Let the game begin...\n");
-    fprintf(opp_fp, "My name: %s\n", OPP_NAME_LOG);
-    fprintf(opp_fp, "My colour: %d, %s\n", opp_colour, (opp_colour == BLACK)?"black":"white");
-    fprintf(opp_fp, "Board size: %d\n", BSIZE);
-    fprintf(opp_fp, "-----------------------------------\n");
-    opp_print_board();
+    // fprintf(opp_fp, "Communication initialised \n");
+    // fprintf(opp_fp, "Let the game begin...\n");
+    // fprintf(opp_fp, "My name: %s\n", OPP_NAME_LOG);
+    // fprintf(opp_fp, "My colour: %d, %s\n", opp_colour, (opp_colour == BLACK)?"black":"white");
+    // fprintf(opp_fp, "Board size: %d\n", BSIZE);
+    // fprintf(opp_fp, "-----------------------------------\n");
+    // opp_print_board();
 
-    fflush(opp_fp);
+    // fflush(opp_fp);
 
     return 1;
 }
@@ -113,13 +113,14 @@ bool opp_gen_move(int *move) {
     return game_over(); 
 }
 
-bool opp_apply_move(char *move) {
+bool opp_apply_move(char *move, int colour) {
+    printf("Applying a move to the board\n");
     int opp_move = atoi(move);
-    opp_make_move(opp_move, (opp_colour + 1) % 2);
+    opp_make_move(opp_move, colour);
 
-    fprintf(opp_fp, "\nPlacing %s player's piece: row %d, col %d\n", (opp_colour == BLACK)?"white":"black", opp_move/BSIZE, opp_move%BSIZE);
-    opp_print_board();
-    fflush(opp_fp);
+    // fprintf(opp_fp, "\nPlacing %s player's piece: row %d, col %d\n", (opp_colour == BLACK)?"white":"black", opp_move/BSIZE, opp_move%BSIZE);
+    // opp_print_board();
+    // fflush(opp_fp);
 
     return game_over();
 }

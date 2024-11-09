@@ -396,14 +396,14 @@ int initialise_comms(char* address, int port) {
 int send_move(char* move) {
     try {
 
-        std::cout << "Sending a move to the server" << std::endl;
+        std::cout << "Sending a move to the server: " << move << std::endl;
         messages::MatchPlayMessages request;
         request.set_command(constants::Command::PLAY_MOVE);
         auto* action = request.mutable_action();
         
         // Parse move string and set action properties
         // This will depend on your specific game's move format
-        int x = *move;
+        int x = atoi(move);
         action->set_x(x);
         
         if (!stream_->Write(request)) {
@@ -425,7 +425,7 @@ int receive_message(int* msg) {
         request.set_command(constants::Command::GET_COMMAND);
 
         if (!stream_->Write(request)) { // write the message
-            return constants::Command::GAME_TERMINATION;
+            return GAME_TERMINATION;
         }
 
         // Read the response from the server
@@ -434,7 +434,23 @@ int receive_message(int* msg) {
         std::cout << "Recieved a response from the server for move" << std::endl; 
 
 
-        return response.command();
+        switch(response.command()) {
+            case constants::Command::GENERATE_MOVE: // server requuests a move from the player
+                std::cout << "Received a request to generate a move" << std::endl;
+                return GENERATE_MOVE;
+            case constants::Command::PLAY_MOVE: // server requests player to apply opponent move
+                std::cout << "Received a request to apply an opponents move" << std::endl;
+                return PLAY_MOVE;
+            case constants::Command::GAME_TERMINATION: // server has terminated the game
+                std::cout << "The game has come to and end" << std::endl;
+                return GAME_TERMINATION;
+            case constants::Command::MATCH_RESET: // server has requested a match reset
+                std::cout << "The match has been reset" << std::endl;
+                return MATCH_RESET;
+            default:    
+                std::cout << "Other command" << std::endl;
+                return UNKNOWN;
+        }
         // std::unique_lock<std::mutex> lock(queue_mutex_);
         // bool has_message = queue_cv_.wait_for(lock, 
         //     std::chrono::seconds(1), 

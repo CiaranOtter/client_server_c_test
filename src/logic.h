@@ -16,6 +16,7 @@ extern "C" {
 #define BLACK 0
 #define WHITE 1
 
+int opp_init(int);
 void opp_run_master(int);
 
 void opp_initialise_board(void);
