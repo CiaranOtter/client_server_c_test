@@ -5,4 +5,4 @@ compile:
 	javac 
 
 build-docker:
-	docker build -t test-ref-c -f dep_docker/Dockerfile .
+	docker build -t test-ref -f dep_docker/Dockerfile .

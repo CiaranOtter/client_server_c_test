@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}-register-player"
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: "{{ .Release.Name }}"
+      labels:
+        app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: test-curl
+          image: test-curl:latest  # Replace with an image containing grpcurl or use a custom image 
+          imagePullPolicy: IfNotPresent 
+          args:
+            - -d
+            - "{\"depname\":\"{{ include "register-job.fullname" . }}\",\"name\":\"{{ .Values.curlCommand.data.refereeName }}\"}"
+            - --plaintext
+            - -allow-unknown-fields 
+            - {{ .Values.curlCommand.host }}:{{ .Values.curlCommand.port }}
+            - referees.RefereeService.CreateReferee
+  backoffLimit: 1
