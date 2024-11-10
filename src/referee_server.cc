@@ -111,6 +111,7 @@ grpc::Status RefereeServer::GameServiceImpl::PlayGame(
     // Handle bidirectional streaming
 
     constants::Command cur_command = constants::Command::GENERATE_MOVE;
+    int player_colour = 0;
 
     messages::MatchPlayMessages request;
     while (stream->Read(&request)) {
@@ -124,46 +125,72 @@ grpc::Status RefereeServer::GameServiceImpl::PlayGame(
             case constants::Command::CONNECT: {
                 std::cout << "A new player has connected" << std::endl;
 
-                messages::Player player = request.player();
+                messages::Player player = request.player(); // Get the player from the request
 
-                std::cout << player.playername() << " has joined the game" << std::endl;
-                player_count += 1;
-                game_ready.notify_one();
-                std::unique_lock<std::mutex> lock(game_ready_m);
+                std::cout << player.playername() << " has joined the game" << std::endl;    
+
+                player_count += 1;                          // Increase the total number of players connected to the game
+                player_colour = request.player_postion();  // set the the colour of the player for the match
+
+                if (request.player_postion() == 1) { 
+                    // if the player is the first player set their first command to generate a move
+                    cur_command = constants::Command::GENERATE_MOVE;
+                } else {
+                    // else prepare the player for an opponents move
+                    cur_command = constants::Command::PLAY_MOVE;
+                }
+
+    
+                game_ready.notify_one(); // if there are any players waiting for the game to start. Notify the new player to check if the game is ready
+               
+                std::unique_lock<std::mutex> lock(game_ready_m); // create a lock for the player to start waiting for the match to be ready
                 game_ready.wait(lock, [this] {
-                    return player_count == 2;
+                    return player_count == 2; // if the match has sufficient players, unlock the player
                 });
                 
+                // send the ready match response to the player
                 if (!stream->Write(request)) {
                     return grpc::Status(grpc::StatusCode::ABORTED, "Failed to send response to player to start the game");
                 }
                 break;
             }
+
+            
             case constants::Command::PLAY_MOVE: {
+
                 std::cout << "The player has played a move: " << request.action().x() << std::endl;
-                move_available = true;
-                if (!referee_server_->game_logic_->processAction(request.action())) {
-                    referee_server_->is_running_ = false;
-                    std::cout << "An illegal move has been played" << std::endl;
+
+                move_available = true; // log that move is available
+                last_move = request.action().x();
+
+                if (!referee_server_->game_logic_->processAction(request.action())) {   // process the new move
+                    referee_server_->is_running_ = false;   // if the move is illegal, end the match
+                    std::cout << "An illegal move has been played" << std::endl;   
+                    cur_command = constants::Command::GAME_TERMINATION;
+
                 }
-                cur_command = constants::Command::GAME_TERMINATION;
+                
                 move_available_c.notify_one();
                 break;
             }
             case constants::Command::GET_COMMAND: {
                 std::cout << "The player has requested a command" << std::endl; 
 
-                messages::MatchPlayMessages command;
-                command.set_command(cur_command);
+                
 
                 std::cout << "Seding the player a command" << std::endl;
                 
+                messages::MatchPlayMessages command;
+                command.set_command(cur_command); // set the players commmand
+
+
+                // if it is this players turn
 
                 if (cur_command == constants::Command::GENERATE_MOVE) {
-                    cur_command = constants::Command::PLAY_MOVE;
+                    cur_command = constants::Command::PLAY_MOVE; // update their turn to play an opponents move next
                 } else {
                     {
-                        std::mutex await_move;
+                        std::mutex await_move; // await for a move to be ready
                         std::unique_lock<std::mutex> move_lock(await_move);
                         move_available_c.wait(move_lock, [this] {
                             return move_available || !referee_server_->is_running_;
@@ -174,13 +201,13 @@ grpc::Status RefereeServer::GameServiceImpl::PlayGame(
                         }
 
                         cur_command = constants::Command::GENERATE_MOVE;
-                        command.mutable_action()->set_x(1);
+                        command.mutable_action()->set_x(last_move);
                         move_available = false;
                     }
                     
                 }
                 
-
+                // send the command to the player
                 if (!stream->Write(command)) {
                     return grpc::Status(grpc::StatusCode::ABORTED, "Failed to send a command to the player");
                 }

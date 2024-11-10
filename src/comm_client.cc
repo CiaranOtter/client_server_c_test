@@ -355,6 +355,10 @@ const char* playername = "Player1"; // Set your player name here
 
 int initialise_comms(char* address, int port) {
     try {
+
+        int user = atoi(std::getenv("PLAYER_COLOUR"));
+
+
         // Create channel and stub
         std::string server_address = std::string(address) + ":" + std::to_string(port);
         auto channel = grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
@@ -376,6 +380,7 @@ int initialise_comms(char* address, int port) {
 
         messages::MatchPlayMessages connect_request;
         connect_request.set_command(constants::Command::CONNECT);
+        connect_request.set_player_postion(user);
         messages::Player* temp = connect_request.mutable_player();
         temp->set_playername("Player1");
 
@@ -430,9 +435,12 @@ int receive_message(int* msg) {
 
         // Read the response from the server
         std::cout << "Requested the server for a command" << std::endl;
-        stream_->Read(&response);
+        if (!stream_->Read(&response)) {
+            return GAME_TERMINATION;
+        }
         std::cout << "Recieved a response from the server for move" << std::endl; 
 
+        *msg = response.action().x();
 
         switch(response.command()) {
             case constants::Command::GENERATE_MOVE: // server requuests a move from the player
@@ -451,20 +459,9 @@ int receive_message(int* msg) {
                 std::cout << "Other command" << std::endl;
                 return UNKNOWN;
         }
-        // std::unique_lock<std::mutex> lock(queue_mutex_);
-        // bool has_message = queue_cv_.wait_for(lock, 
-        //     std::chrono::seconds(1), 
-        //     []{return !message_queue_.empty();});
-
-        // if (!has_message) {
-        //     return -1; // Timeout
-        // }
-
-        // *msg = message_queue_.front();
-        // message_queue_.pop();
-        // return 0; // Success
+        
     } catch (const std::exception&) {
-        return constants::Command::GAME_TERMINATION; // Error
+        return GAME_TERMINATION;
     }
 }
 

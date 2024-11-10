@@ -40,6 +40,7 @@ private:
         RefereeServer* referee_server_;
         int player_count;
         bool move_available;
+        int last_move;
         std::condition_variable game_ready;
         std::mutex game_ready_m;
         std::condition_variable move_available_c;
